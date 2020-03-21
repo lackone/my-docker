@@ -171,14 +171,16 @@ docker-compose up -d 服务名
 ```
 
 2、修改容器名
+
 如果你修改了容器名container_name，或者你使用其他版本的php或mysql，注意连接时要使用对应的容器名。
+
 比如nginx目录下conf.d/default.conf中的
 ```
 fastcgi_pass   php:9000;
 ```
-这里的php就需要改成对应容器名称。
+这里的php就需要改成对应容器名称，比如：php73，php72，php56。
 
-还有在php连接mysql时，这里的host要写成对应的容器名称。不然会无法连上。
+还有在php连接mysql时，这里的host要写成对应的容器名称，比如：mysql5，mysql8。不然会无法连上。
 ```
 $dbh = new PDO('mysql:host=mysql;dbname=mysql', 'root', '123456');
 ```
