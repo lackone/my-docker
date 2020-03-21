@@ -1,0 +1,538 @@
+#表示docker-compose.yml文件的版本，目前主流为3.x，支持docker1.13.0及以上版本
+version: '3'
+
+#定义所有服务
+services:
+
+  #nginx服务
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    container_name: nginx
+    restart: always
+    ports:
+      - ${NGINX_HTTP_PORT}:80
+      - ${NGINX_HTTPS_PORT}:443
+    volumes: 
+      - ${WWWROOT_DIR}:/wwwroot:rw
+      - ${NGINX_SSL_CERTIFICATE_DIR}:/ssl:rw
+      - ${NGINX_CONFD_DIR}:/etc/nginx/conf.d:rw
+      - ${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
+      - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:rw
+      - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:rw
+      - ${NGINX_LOG_DIR}:/var/log/nginx:rw
+    networks:
+      - lnmp
+
+  #mysql8服务
+  mysql8:
+    image: mysql:${MYSQL8_VERSION}
+    container_name: mysql
+    restart: always
+    ports:
+      - ${MYSQL8_HOST_PORT}:3306
+    volumes: 
+      - ${MYSQL8_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:rw
+      - ${MYSQL8_DATA_DIR}:/var/lib/mysql:rw
+      - ${MYSQL8_LOG_DIR}:/var/log/mysql:rw
+    command:
+      - --default_authentication_plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      - lnmp
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL8_ROOT_PASSWORD}
+      TZ: ${TZ}
+
+  #mysql5服务
+  mysql5:
+    image: mysql:${MYSQL5_VERSION}
+    container_name: mysql5
+    restart: always
+    ports:
+      - ${MYSQL5_HOST_PORT}:3306
+    volumes: 
+      - ${MYSQL5_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:rw
+      - ${MYSQL5_DATA_DIR}:/var/lib/mysql:rw
+      - ${MYSQL5_LOG_DIR}:/var/log/mysql:rw
+    command:
+      - --default_authentication_plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      - lnmp
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL5_ROOT_PASSWORD}
+      TZ: ${TZ}
+
+  #php74服务
+  php74:
+    container_name: php
+    build:
+      context: ./services/php/
+      args:
+        - PHP_VERSION=${PHP74_VERSION}
+        - TZ=${TZ}
+        - REPOSITORIES=${REPOSITORIES}
+        - PHP_PDO_MYSQL=${PHP_PDO_MYSQL}
+        - PHP_ZIP=${PHP_ZIP}
+        - PHP_PCNTL=${PHP_PCNTL}
+        - PHP_MYSQLI=${PHP_MYSQLI}
+        - PHP_EXIF=${PHP_EXIF}
+        - PHP_BCMATH=${PHP_BCMATH}
+        - PHP_CALENDAR=${PHP_CALENDAR}
+        - PHP_ZEND_TEST=${PHP_ZEND_TEST}
+        - PHP_OPCACHE=${PHP_OPCACHE}
+        - PHP_SOCKETS=${PHP_SOCKETS}
+        - PHP_GETTEXT=${PHP_GETTEXT}
+        - PHP_SHMOP=${PHP_SHMOP}
+        - PHP_SYSVMSG=${PHP_SYSVMSG}
+        - PHP_SYSVSEM=${PHP_SYSVSEM}
+        - PHP_SYSVSHM=${PHP_SYSVSHM}
+        - PHP_PDO_FIREBIRD=${PHP_PDO_FIREBIRD}
+        - PHP_PDO_DBLIB=${PHP_PDO_DBLIB}
+        - PHP_PDO_OCI=${PHP_PDO_OCI}
+        - PHP_PDO_ODBC=${PHP_PDO_ODBC}
+        - PHP_PDO_PGSQL=${PHP_PDO_PGSQL}
+        - PHP_PGSQL=${PHP_PGSQL}
+        - PHP_OCI8=${PHP_OCI8}
+        - PHP_ODBC=${PHP_ODBC}
+        - PHP_DBA=${PHP_DBA}
+        - PHP_GD=${PHP_GD}
+        - PHP_INTL=${PHP_INTL}
+        - PHP_BZ2=${PHP_BZ2}
+        - PHP_SOAP=${PHP_SOAP}
+        - PHP_XSL=${PHP_XSL}
+        - PHP_XMLRPC=${PHP_XMLRPC}
+        - PHP_WDDX=${PHP_WDDX}
+        - PHP_CURL=${PHP_CURL}
+        - PHP_READLINE=${PHP_READLINE}
+        - PHP_SNMP=${PHP_SNMP}
+        - PHP_PSPELL=${PHP_PSPELL}
+        - PHP_RECODE=${PHP_RECODE}
+        - PHP_TIDY=${PHP_TIDY}
+        - PHP_GMP=${PHP_GMP}
+        - PHP_IMAP=${PHP_IMAP}
+        - PHP_LDAP=${PHP_LDAP}
+        - PHP_IMAGICK=${PHP_IMAGICK}
+        - PHP_SQLSRV=${PHP_SQLSRV}
+        - PHP_MCRYPT=${PHP_MCRYPT}
+        - PHP_REDIS=${PHP_REDIS}
+        - PHP_MEMCACHED=${PHP_MEMCACHED}
+        - PHP_XDEBUG=${PHP_XDEBUG}
+        - PHP_SWOOLE=${PHP_SWOOLE}
+        - PHP_PDO_SQLSRV=${PHP_PDO_SQLSRV}
+        - PHP_SODIUM=${PHP_SODIUM}
+        - PHP_YAF=${PHP_YAF}
+        - PHP_MYSQL=${PHP_MYSQL}
+        - PHP_AMQP=${PHP_AMQP}
+        - PHP_MONGODB=${PHP_MONGODB}
+        - PHP_EVENT=${PHP_EVENT}
+        - PHP_RAR=${PHP_RAR}
+        - PHP_AST=${PHP_AST}
+        - PHP_YAC=${PHP_YAC}
+        - PHP_YAR=${PHP_YAR}
+        - PHP_YACONF=${PHP_YACONF}
+        - PHP_MSGPACK=${PHP_MSGPACK}
+        - PHP_IGBINARY=${PHP_IGBINARY}
+        - PHP_SEASLOG=${PHP_SEASLOG}
+        - PHP_VARNISH=${PHP_VARNISH}
+        - PHP_XHPROF=${PHP_XHPROF}
+        - PHP_XLSWRITER=${PHP_XLSWRITER}
+        - PHP_MEMCACHE=${PHP_MEMCACHE}
+        - PHP_APCU=${PHP_APCU}
+        - PHP_TAINT=${PHP_TAINT}
+        - PHP_YAML=${PHP_YAML}
+    restart: always
+    ports:
+      - ${PHP74_FASTCGI_PORT}:9000
+    volumes: 
+      - ${WWWROOT_DIR}:/wwwroot:rw
+      - ${PHP74_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:rw
+      - ${PHP74_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf:rw
+      - ${PHP74_FPMD_DIR}:/usr/local/etc/php-fpm.d:rw
+      - ${PHP74_LOG_DIR}:/var/log/php:rw
+    networks:
+      - lnmp
+
+  #php73服务
+  php73:
+    container_name: php73
+    build:
+      context: ./services/php/
+      args:
+        - PHP_VERSION=${PHP73_VERSION}
+        - TZ=${TZ}
+        - REPOSITORIES=${REPOSITORIES}
+        - PHP_PDO_MYSQL=${PHP_PDO_MYSQL}
+        - PHP_ZIP=${PHP_ZIP}
+        - PHP_PCNTL=${PHP_PCNTL}
+        - PHP_MYSQLI=${PHP_MYSQLI}
+        - PHP_EXIF=${PHP_EXIF}
+        - PHP_BCMATH=${PHP_BCMATH}
+        - PHP_CALENDAR=${PHP_CALENDAR}
+        - PHP_ZEND_TEST=${PHP_ZEND_TEST}
+        - PHP_OPCACHE=${PHP_OPCACHE}
+        - PHP_SOCKETS=${PHP_SOCKETS}
+        - PHP_GETTEXT=${PHP_GETTEXT}
+        - PHP_SHMOP=${PHP_SHMOP}
+        - PHP_SYSVMSG=${PHP_SYSVMSG}
+        - PHP_SYSVSEM=${PHP_SYSVSEM}
+        - PHP_SYSVSHM=${PHP_SYSVSHM}
+        - PHP_PDO_FIREBIRD=${PHP_PDO_FIREBIRD}
+        - PHP_PDO_DBLIB=${PHP_PDO_DBLIB}
+        - PHP_PDO_OCI=${PHP_PDO_OCI}
+        - PHP_PDO_ODBC=${PHP_PDO_ODBC}
+        - PHP_PDO_PGSQL=${PHP_PDO_PGSQL}
+        - PHP_PGSQL=${PHP_PGSQL}
+        - PHP_OCI8=${PHP_OCI8}
+        - PHP_ODBC=${PHP_ODBC}
+        - PHP_DBA=${PHP_DBA}
+        - PHP_GD=${PHP_GD}
+        - PHP_INTL=${PHP_INTL}
+        - PHP_BZ2=${PHP_BZ2}
+        - PHP_SOAP=${PHP_SOAP}
+        - PHP_XSL=${PHP_XSL}
+        - PHP_XMLRPC=${PHP_XMLRPC}
+        - PHP_WDDX=${PHP_WDDX}
+        - PHP_CURL=${PHP_CURL}
+        - PHP_READLINE=${PHP_READLINE}
+        - PHP_SNMP=${PHP_SNMP}
+        - PHP_PSPELL=${PHP_PSPELL}
+        - PHP_RECODE=${PHP_RECODE}
+        - PHP_TIDY=${PHP_TIDY}
+        - PHP_GMP=${PHP_GMP}
+        - PHP_IMAP=${PHP_IMAP}
+        - PHP_LDAP=${PHP_LDAP}
+        - PHP_IMAGICK=${PHP_IMAGICK}
+        - PHP_SQLSRV=${PHP_SQLSRV}
+        - PHP_MCRYPT=${PHP_MCRYPT}
+        - PHP_REDIS=${PHP_REDIS}
+        - PHP_MEMCACHED=${PHP_MEMCACHED}
+        - PHP_XDEBUG=${PHP_XDEBUG}
+        - PHP_SWOOLE=${PHP_SWOOLE}
+        - PHP_PDO_SQLSRV=${PHP_PDO_SQLSRV}
+        - PHP_SODIUM=${PHP_SODIUM}
+        - PHP_YAF=${PHP_YAF}
+        - PHP_MYSQL=${PHP_MYSQL}
+        - PHP_AMQP=${PHP_AMQP}
+        - PHP_MONGODB=${PHP_MONGODB}
+        - PHP_EVENT=${PHP_EVENT}
+        - PHP_RAR=${PHP_RAR}
+        - PHP_AST=${PHP_AST}
+        - PHP_YAC=${PHP_YAC}
+        - PHP_YAR=${PHP_YAR}
+        - PHP_YACONF=${PHP_YACONF}
+        - PHP_MSGPACK=${PHP_MSGPACK}
+        - PHP_IGBINARY=${PHP_IGBINARY}
+        - PHP_SEASLOG=${PHP_SEASLOG}
+        - PHP_VARNISH=${PHP_VARNISH}
+        - PHP_XHPROF=${PHP_XHPROF}
+        - PHP_XLSWRITER=${PHP_XLSWRITER}
+        - PHP_MEMCACHE=${PHP_MEMCACHE}
+        - PHP_APCU=${PHP_APCU}
+        - PHP_TAINT=${PHP_TAINT}
+        - PHP_YAML=${PHP_YAML}
+    restart: always
+    ports:
+      - ${PHP73_FASTCGI_PORT}:9000
+    volumes: 
+      - ${WWWROOT_DIR}:/wwwroot:rw
+      - ${PHP73_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:rw
+      - ${PHP73_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf:rw
+      - ${PHP73_FPMD_DIR}:/usr/local/etc/php-fpm.d:rw
+      - ${PHP73_LOG_DIR}:/var/log/php:rw
+    networks:
+      - lnmp
+
+  #php72服务
+  php72:
+    container_name: php72
+    build:
+      context: ./services/php/
+      args:
+        - PHP_VERSION=${PHP72_VERSION}
+        - TZ=${TZ}
+        - REPOSITORIES=${REPOSITORIES}
+        - PHP_PDO_MYSQL=${PHP_PDO_MYSQL}
+        - PHP_ZIP=${PHP_ZIP}
+        - PHP_PCNTL=${PHP_PCNTL}
+        - PHP_MYSQLI=${PHP_MYSQLI}
+        - PHP_EXIF=${PHP_EXIF}
+        - PHP_BCMATH=${PHP_BCMATH}
+        - PHP_CALENDAR=${PHP_CALENDAR}
+        - PHP_ZEND_TEST=${PHP_ZEND_TEST}
+        - PHP_OPCACHE=${PHP_OPCACHE}
+        - PHP_SOCKETS=${PHP_SOCKETS}
+        - PHP_GETTEXT=${PHP_GETTEXT}
+        - PHP_SHMOP=${PHP_SHMOP}
+        - PHP_SYSVMSG=${PHP_SYSVMSG}
+        - PHP_SYSVSEM=${PHP_SYSVSEM}
+        - PHP_SYSVSHM=${PHP_SYSVSHM}
+        - PHP_PDO_FIREBIRD=${PHP_PDO_FIREBIRD}
+        - PHP_PDO_DBLIB=${PHP_PDO_DBLIB}
+        - PHP_PDO_OCI=${PHP_PDO_OCI}
+        - PHP_PDO_ODBC=${PHP_PDO_ODBC}
+        - PHP_PDO_PGSQL=${PHP_PDO_PGSQL}
+        - PHP_PGSQL=${PHP_PGSQL}
+        - PHP_OCI8=${PHP_OCI8}
+        - PHP_ODBC=${PHP_ODBC}
+        - PHP_DBA=${PHP_DBA}
+        - PHP_GD=${PHP_GD}
+        - PHP_INTL=${PHP_INTL}
+        - PHP_BZ2=${PHP_BZ2}
+        - PHP_SOAP=${PHP_SOAP}
+        - PHP_XSL=${PHP_XSL}
+        - PHP_XMLRPC=${PHP_XMLRPC}
+        - PHP_WDDX=${PHP_WDDX}
+        - PHP_CURL=${PHP_CURL}
+        - PHP_READLINE=${PHP_READLINE}
+        - PHP_SNMP=${PHP_SNMP}
+        - PHP_PSPELL=${PHP_PSPELL}
+        - PHP_RECODE=${PHP_RECODE}
+        - PHP_TIDY=${PHP_TIDY}
+        - PHP_GMP=${PHP_GMP}
+        - PHP_IMAP=${PHP_IMAP}
+        - PHP_LDAP=${PHP_LDAP}
+        - PHP_IMAGICK=${PHP_IMAGICK}
+        - PHP_SQLSRV=${PHP_SQLSRV}
+        - PHP_MCRYPT=${PHP_MCRYPT}
+        - PHP_REDIS=${PHP_REDIS}
+        - PHP_MEMCACHED=${PHP_MEMCACHED}
+        - PHP_XDEBUG=${PHP_XDEBUG}
+        - PHP_SWOOLE=${PHP_SWOOLE}
+        - PHP_PDO_SQLSRV=${PHP_PDO_SQLSRV}
+        - PHP_SODIUM=${PHP_SODIUM}
+        - PHP_YAF=${PHP_YAF}
+        - PHP_MYSQL=${PHP_MYSQL}
+        - PHP_AMQP=${PHP_AMQP}
+        - PHP_MONGODB=${PHP_MONGODB}
+        - PHP_EVENT=${PHP_EVENT}
+        - PHP_RAR=${PHP_RAR}
+        - PHP_AST=${PHP_AST}
+        - PHP_YAC=${PHP_YAC}
+        - PHP_YAR=${PHP_YAR}
+        - PHP_YACONF=${PHP_YACONF}
+        - PHP_MSGPACK=${PHP_MSGPACK}
+        - PHP_IGBINARY=${PHP_IGBINARY}
+        - PHP_SEASLOG=${PHP_SEASLOG}
+        - PHP_VARNISH=${PHP_VARNISH}
+        - PHP_XHPROF=${PHP_XHPROF}
+        - PHP_XLSWRITER=${PHP_XLSWRITER}
+        - PHP_MEMCACHE=${PHP_MEMCACHE}
+        - PHP_APCU=${PHP_APCU}
+        - PHP_TAINT=${PHP_TAINT}
+        - PHP_YAML=${PHP_YAML}
+    restart: always
+    ports:
+      - ${PHP72_FASTCGI_PORT}:9000
+    volumes: 
+      - ${WWWROOT_DIR}:/wwwroot:rw
+      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:rw
+      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf:rw
+      - ${PHP72_FPMD_DIR}:/usr/local/etc/php-fpm.d:rw
+      - ${PHP72_LOG_DIR}:/var/log/php:rw
+    networks:
+      - lnmp
+
+  #php56服务
+  php56:
+    container_name: php56
+    build:
+      context: ./services/php/
+      args:
+        - PHP_VERSION=${PHP56_VERSION}
+        - TZ=${TZ}
+        - REPOSITORIES=${REPOSITORIES}
+        - PHP_PDO_MYSQL=${PHP_PDO_MYSQL}
+        - PHP_ZIP=${PHP_ZIP}
+        - PHP_PCNTL=${PHP_PCNTL}
+        - PHP_MYSQLI=${PHP_MYSQLI}
+        - PHP_EXIF=${PHP_EXIF}
+        - PHP_BCMATH=${PHP_BCMATH}
+        - PHP_CALENDAR=${PHP_CALENDAR}
+        - PHP_ZEND_TEST=${PHP_ZEND_TEST}
+        - PHP_OPCACHE=${PHP_OPCACHE}
+        - PHP_SOCKETS=${PHP_SOCKETS}
+        - PHP_GETTEXT=${PHP_GETTEXT}
+        - PHP_SHMOP=${PHP_SHMOP}
+        - PHP_SYSVMSG=${PHP_SYSVMSG}
+        - PHP_SYSVSEM=${PHP_SYSVSEM}
+        - PHP_SYSVSHM=${PHP_SYSVSHM}
+        - PHP_PDO_FIREBIRD=${PHP_PDO_FIREBIRD}
+        - PHP_PDO_DBLIB=${PHP_PDO_DBLIB}
+        - PHP_PDO_OCI=${PHP_PDO_OCI}
+        - PHP_PDO_ODBC=${PHP_PDO_ODBC}
+        - PHP_PDO_PGSQL=${PHP_PDO_PGSQL}
+        - PHP_PGSQL=${PHP_PGSQL}
+        - PHP_OCI8=${PHP_OCI8}
+        - PHP_ODBC=${PHP_ODBC}
+        - PHP_DBA=${PHP_DBA}
+        - PHP_GD=${PHP_GD}
+        - PHP_INTL=${PHP_INTL}
+        - PHP_BZ2=${PHP_BZ2}
+        - PHP_SOAP=${PHP_SOAP}
+        - PHP_XSL=${PHP_XSL}
+        - PHP_XMLRPC=${PHP_XMLRPC}
+        - PHP_WDDX=${PHP_WDDX}
+        - PHP_CURL=${PHP_CURL}
+        - PHP_READLINE=${PHP_READLINE}
+        - PHP_SNMP=${PHP_SNMP}
+        - PHP_PSPELL=${PHP_PSPELL}
+        - PHP_RECODE=${PHP_RECODE}
+        - PHP_TIDY=${PHP_TIDY}
+        - PHP_GMP=${PHP_GMP}
+        - PHP_IMAP=${PHP_IMAP}
+        - PHP_LDAP=${PHP_LDAP}
+        - PHP_IMAGICK=${PHP_IMAGICK}
+        - PHP_SQLSRV=${PHP_SQLSRV}
+        - PHP_MCRYPT=${PHP_MCRYPT}
+        - PHP_REDIS=${PHP_REDIS}
+        - PHP_MEMCACHED=${PHP_MEMCACHED}
+        - PHP_XDEBUG=${PHP_XDEBUG}
+        - PHP_SWOOLE=${PHP_SWOOLE}
+        - PHP_PDO_SQLSRV=${PHP_PDO_SQLSRV}
+        - PHP_SODIUM=${PHP_SODIUM}
+        - PHP_YAF=${PHP_YAF}
+        - PHP_MYSQL=${PHP_MYSQL}
+        - PHP_AMQP=${PHP_AMQP}
+        - PHP_MONGODB=${PHP_MONGODB}
+        - PHP_EVENT=${PHP_EVENT}
+        - PHP_RAR=${PHP_RAR}
+        - PHP_AST=${PHP_AST}
+        - PHP_YAC=${PHP_YAC}
+        - PHP_YAR=${PHP_YAR}
+        - PHP_YACONF=${PHP_YACONF}
+        - PHP_MSGPACK=${PHP_MSGPACK}
+        - PHP_IGBINARY=${PHP_IGBINARY}
+        - PHP_SEASLOG=${PHP_SEASLOG}
+        - PHP_VARNISH=${PHP_VARNISH}
+        - PHP_XHPROF=${PHP_XHPROF}
+        - PHP_XLSWRITER=${PHP_XLSWRITER}
+        - PHP_MEMCACHE=${PHP_MEMCACHE}
+        - PHP_APCU=${PHP_APCU}
+        - PHP_TAINT=${PHP_TAINT}
+        - PHP_YAML=${PHP_YAML}
+    restart: always
+    ports:
+      - ${PHP56_FASTCGI_PORT}:9000
+    volumes: 
+      - ${WWWROOT_DIR}:/wwwroot:rw
+      - ${PHP56_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:rw
+      - ${PHP56_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf:rw
+      - ${PHP56_FPMD_DIR}:/usr/local/etc/php-fpm.d:rw
+      - ${PHP56_LOG_DIR}:/var/log/php:rw
+    networks:
+      - lnmp
+
+  #redis服务
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: redis
+    restart: always
+    ports:
+      - ${REDIS_HOST_PORT}:6379
+    volumes: 
+      - ${REDIS_CONF_FILE}:/etc/redis.conf:rw
+      - ${REDIS_DATA_DIR}:/data:rw
+    entrypoint: ["redis-server", "/etc/redis.conf"]
+    networks:
+      - lnmp
+
+  #memcached服务
+  memcached:
+    image: memcached:${MEMCACHED_VERSION}
+    container_name: memcached
+    restart: always
+    ports:
+      - ${MEMCACHED_HOST_PORT}:11211
+    environment: 
+      MEMCACHED_CACHE_SIZE: ${MEMCACHED_CACHE_SIZE}
+    networks:
+      - lnmp
+
+  #mongodb服务
+  mongodb:
+    image: mongo:${MONGO_VERSION}
+    container_name: mongodb
+    restart: always
+    ports:
+      - ${MONGO_HOST_PORT}:27017
+    volumes:
+      - ${MONGO_DATA_DIR}:/data/db:rw
+    environment: 
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    command:
+      - --auth
+    networks:
+      - lnmp
+
+  #mongo-express服务
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - ${MONGOEXPRESS_HOST_PORT}:8081
+    environment: 
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    networks:
+      - lnmp
+
+  #phpmyadmin服务
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    ports:
+      - ${PHPMYADMIN_HOST_PORT}:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+    networks:
+      - lnmp
+
+  #phpredisadmin服务
+  phpredisadmin:
+    image: erikdubbelboer/phpredisadmin:latest
+    container_name: phpredisadmin
+    ports:
+      - ${PHPREDISADMIN_HOST_PORT}:80
+    environment:
+      - REDIS_1_HOST=redis
+      - REDIS_1_PORT=6379
+    networks:
+      - lnmp
+
+  #adminmongo服务
+  adminmongo:
+    image: mrvautin/adminmongo
+    container_name: adminmongo
+    ports:
+      - ${ADMINMONGO_HOST_PORT}:1234
+    environment:
+      - HOST=0.0.0.0
+      - DB_HOST=mongodb
+      - DB_PORT=27017
+    networks:
+      - lnmp
+
+  #rabbitmq服务
+  rabbitmq:
+    image: rabbitmq:${RABBITMQ_VERSION}
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - ${RABBITMQ_HOST_PORT_CLIENT}:5672
+      - ${RABBITMQ_HOST_PORT_SERVER}:15672
+    environment: 
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - lnmp
+
+#定义容器连接的网络
+networks:
+  lnmp:
