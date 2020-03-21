@@ -2,7 +2,8 @@
 基于docker-compose编排的一套LNMP环境
 
 ## 用途描述
-主要用于PHP开发和测试下的环境快速搭建，注意，切勿用于生产环境。
+主要用于PHP开发和测试下的环境快速搭建，注意，注意，注意，切勿用于生产环境。
+因为在构建php时，在Dockerfile中进行判断安装扩展操作，这会导致层过多，体积过大，建议只用于开发和测试。
 
 ## 参考链接
 * [https://github.com/laradock/laradock](https://github.com/laradock/laradock)，laradock
@@ -15,7 +16,7 @@
 * [https://github.com/duiying/Docker-LNMP](https://github.com/duiying/Docker-LNMP)，duiying
 * [https://github.com/YanlongMa/docker-lnmp](https://github.com/YanlongMa/docker-lnmp)，YanlongMa
 
-参考于上面多个项目，感谢他们的开源项目。
+参考于上面多个项目，感谢，感谢，感谢，他们的开源项目。
 
 ## 使用方法
 
